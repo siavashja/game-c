@@ -92,3 +92,31 @@ void remap(char** map,int x,int y){
         printf("\n");
     }
 }
+
+Point nearest_char(char **map, Point p, char c, int max_i, int max_j) {
+    Point nearest = {-1, -1};
+    int min_dist = 1000;
+    for(int i = 0; i < max_i; i++){
+        for(int j = 0; j < max_j; j++){
+            if(map[i][j] != c)
+                continue;
+
+            int d = dist(p, (Point){i,j});
+            if(d < min_dist){
+                min_dist = d;
+                nearest = (Point){i,j};
+            }
+        }
+    }
+    return nearest;
+}
+
+int dist(Point p1, Point p2) {
+    return abs(p1.x - p2.x) + abs(p1.y + p2.y);
+}
+
+int abs(int x) {
+    if(x < 0)
+        return -x;
+    return x;
+}
