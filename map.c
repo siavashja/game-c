@@ -1,21 +1,17 @@
 #include "map.h"
 #include <stdio.h>
+#include <stdlib.h>
 
-int getnum(){
-
-    int a=0;
-    int b;
-    while((b=getchar())!='\n' && b!= ' '&& b!= EOF)
-        a=a*10+(b-'0');
-    return a;
+int getnum(FILE* file){
+    char c;
+    int res = 0;
+    while((c = fgetc(file)) >= '0' && c <= '9')
+        res = 10*res + c - '0';
+    return res;
 }
 
 char** makemap(int x,int y){
 
-    //int x=getnum();
-    //int y=getnum();
-
-    //char map[x+1][y+1];
     char** map = (char**)malloc(sizeof(char*)*(x+1));
     for(int i=0;i<x+1;i++){
         map[i] = (char*)malloc(sizeof(char)*(y+1));

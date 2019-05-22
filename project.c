@@ -1,15 +1,8 @@
 #include <stdio.h>
 #include <time.h>
-#include <conio.h>
 #include <stdlib.h>
 #include "map.h"
 #include "game.h"
-
-
-int get_time(){
-    float second=getnum();
-    return second;
-}
 
 clock_t start;
 void refresh(time,map,i,j){
@@ -28,12 +21,20 @@ void refresh(time,map,i,j){
 }
 
 //void move(char** map,char STATE1,char STATE2)
-main(){
-    int x=getnum();
-    int y=getnum();
-    int max_i=x;
-    int max_j=y;
-    float time=get_time();
+int main(){
+    FILE *file;
+    file = fopen("map.txt", "r");
+    int x, y;
+    float time;
+    Player player1, player2;
+    if(file == NULL) {
+        printf("Cant open the file.(I dunno why !? :)");
+        return 0;
+    }
+
+    init(file, &x, &y, &time);
     makemap(x,y);
-    refresh(time,max_i,max_j);
+    refresh(time,x,y);
+    submit_game(&player1, &player2);
+    printf("\n");
 }

@@ -1,6 +1,8 @@
 #ifndef MAP_H
 #define MAP_H
 
+#include <stdio.h>
+
 typedef struct Point Point;
 
 struct Point{
@@ -9,7 +11,7 @@ struct Point{
     char c;
 };
 
-int getnum();
+int getnum(FILE* file);
 
 char** makemap(int x,int y);
 
