@@ -23,11 +23,11 @@ void refresh(float time, char **map, int i, int j) {
 
 void win(Player *player1, Player *player2) {
     if (player1->score > player2->score) {
-        printf("%s won the game!", player1.name);
+        printf("%s won the game!", player1->name);
         return;
     }
     if (player2->score < player1->score) {
-        printf("%s won the game!", player2.name);
+        printf("%s won the game!", player2->name);
         return;
     } else {
         printf("it's a draw!");
@@ -43,6 +43,7 @@ int main() {
     int x, y;
     float time;
     Player player1, player2;
+    Game game;
     if (file == NULL) {
         printf("Cant open the file.(I dunno why !? :)");
         return 0;
@@ -51,7 +52,7 @@ int main() {
     init(file, &x, &y, &time);
     char** map = makemap(x, y);
     refresh(time, map, x, y);
-    submit_game(&player1, &player2);
+    submit_game(&game);
     printf("\n");
     win(&player1, &player2);
 }

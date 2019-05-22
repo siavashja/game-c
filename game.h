@@ -23,11 +23,11 @@ struct Game {
     Player player2;
 };
 
-Point *get_objs(map** map, char c, Point max);
+Point *get_objs(char** map, char c, Point max);
 
 void init(FILE *file, int *x, int *y, float *time);
 
-void submit_game(Player *player1, Player *player2);
+void submit_game(Game* game);
 
 int len(char *c);
 
@@ -38,5 +38,11 @@ void teleport(char **map, Player *player, Point *teleports, Point max);
 void move_player(char **map, Player *player, Point r, Point max);
 
 void reobj(char **map, Point p, Point max);
+
+int getnum2(char* str, int* i);
+
+void getname(char* str, int* i, char* n);
+
+int find_game(Game* games, Game *game, int size);
 
 #endif

@@ -1,7 +1,7 @@
 #include "game.h"
 #include <conio.h>
 #include <stdlib.h>
-
+#include <stdbool.h>
 
 void init(FILE *file, int *x, int *y, float *time) {
     *x = getnum(file);
@@ -9,7 +9,7 @@ void init(FILE *file, int *x, int *y, float *time) {
     *time = getnum(file);
 }
 
-void submit_game(Player *player1, Player *player2) {
+void submit_game(Game* game) {
     FILE *leader_file = fopen(LEADERBOARD_FILE, "r");
     char content[1000];
     int n = 0, c;
@@ -18,6 +18,7 @@ void submit_game(Player *player1, Player *player2) {
         if (c == '\n')
             n += 1;
     }
+    fclose(leader_file);
     Game *games = (Game *) malloc(sizeof(Game) * n);
     int nn = 0;
     for (int i = 0; i < len(content);) {
@@ -25,12 +26,26 @@ void submit_game(Player *player1, Player *player2) {
             int s1, s2;
             char n1[20], n2[20];
             getname(content, &i, n1);
-            s1 = getnum(content, &i);
-            s2 = getnum(content, &i);
+            s1 = getnum2(content, &i);
+            s2 = getnum2(content, &i);
             getname(content, &i, n2);
             games[nn++] = (Game) {{{0, 0}, s1, ' ', n1},
                                   {{0, 0}, s2, ' ', n2}};
         }
+    }
+
+    int index = find_game(games, game, n);
+    if(index == -1){
+        leader_file = fopen(LEADERBOARD_FILE, "w");
+        fprintf(leader_file, "%s %d %d %s\n", game->player1.name, game->player1.score, game->player2.score, game->player2.name);
+        return;
+    }
+
+    leader_file = fopen(LEADERBOARD_FILE, "a");
+    games[index] = *game;
+    for(int i = 0; i < n; i++){
+        Game* game = &games[i];
+        fprintf(leader_file, "%s %d %d %s\n", game->player1.name, game->player1.score, game->player2.score, game->player2.name);
     }
 }
 
@@ -161,4 +176,27 @@ void teleport(char **map, Player *player, Point *teleports, Point max) {
         start = &teleports[1], end = &teleports[0];
     player->pos = *end;
     reobj(map, *start, max);
+}
+
+int getnum2(char *str, int *i) {
+    char c;
+    int n = 0;
+    while((c = str[(*i)++]) != ' ')
+        n = n*10 + c - '0';
+    return n;
+}
+
+void getname(char *str, int *i, char *n) {
+    char c;
+    while((c = str[(*i)++]) != ' ')
+        *n++ = c;
+}
+
+int find_game(Game *games, Game *game, int size) {
+    for(int i = 0; i < size; i++){
+        if(games[i].player1.name == game->player1.name || games[i].player1.name == game->player2.name)
+            if(games[i].player2.name == game->player1.name || games[i].player2.name == game->player2.name)
+                return i;
+    }
+    return -1;
 }
