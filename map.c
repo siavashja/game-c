@@ -11,7 +11,7 @@ int getnum(FILE *file) {
     return res;
 }
 
-char **makemap(int x, int y) {
+char **makemap(int x, int y, int points) {
 
     char **map = (char **) malloc(sizeof(char *) * (x + 1));
     for (int i = 0; i < x + 1; i++) {
@@ -25,7 +25,7 @@ char **makemap(int x, int y) {
     }
     tele(map, x, y);
     blocker(map, x, y, 2);
-    pointer(map, x, y, 20);
+    pointer(map, x, y, points);
     Fer(map, x, y);
     return map;
 }
@@ -115,7 +115,7 @@ Point nearest_char(char **map, Point p, char c, int max_i, int max_j) {
 }
 
 int dist(Point p1, Point p2) {
-    return abs(p1.x - p2.x) + abs(p1.y + p2.y);
+    return abs(p1.x - p2.x) + abs(p1.y - p2.y);
 }
 
 int abs(int x) {

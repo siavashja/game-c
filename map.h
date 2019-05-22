@@ -16,8 +16,7 @@ int is_equal(Point *f, Point *s);
 
 int getnum(FILE *file);
 
-char **makemap(int x, int y);
-
+char **makemap(int x, int y, int points);
 
 void tele(char **map, int i, int j);
 

@@ -10,14 +10,14 @@ void refresh(float time, Game *game, char **map, int i, int j, int auto_mode) {
     clock_t start = clock();
     remap(map, game, i, j);
     while (time > 0) {
-//        fflush(stdout);
 
         getkey(&STATE1, &STATE2);
         if (clock() - start > 200) {
             move(map, (Point) {i, j}, &STATE1, &STATE2, game, auto_mode);
             remap(map, game, i, j);
             time -= 0.2;
-            printf("\n%.1f", time);
+            printf("%s: %d, %s: %d", game->player1.name, game->player1.score, game->player2.name, game->player2.score);
+            printf("\n%.1f\n", time);
             start = clock();
         }
     }
@@ -38,9 +38,9 @@ void win(Player *player1, Player *player2) {
 }
 
 void input_str(char* str){
-    char c;
+    int c;
     while((c = getchar()) != '\n')
-        *str++ = c;
+        *str++ = (char)c;
 }
 
 void set_options(Game *game, int *auto_mode) {
@@ -80,9 +80,9 @@ int main() {
 
     init(file, &x, &y, &time, &points);
     set_options(&game, &auto_mode);
-    char **map = makemap(x, y);
+    char **map = makemap(x, y, points);
     refresh(time, &game, map, x, y, auto_mode);
     submit_game(&game);
     printf("\n");
-    win(&player1, &player2);
+    win(&game.player1, &game.player2);
 }

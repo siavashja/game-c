@@ -47,5 +47,6 @@ int find_game(Game *games, Game *game, int size);
 char get_best_action(char** map, Game* game, Point max);
 
 char choose_dir(Point start, Point end);
+void clear(char* c, int size);
 
 #endif
