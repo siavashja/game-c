@@ -1,5 +1,5 @@
 #include "game.h"
-//#include <conio.h>
+#include <conio.h>
 #include <stdlib.h>
 
 
@@ -8,352 +8,157 @@ void init(FILE *file, int *x, int *y, float *time) {
     *y = getnum(file);
     *time = getnum(file);
 }
-void tel(char** map,Player *player1,Player *player2,Point *objs,int max_i,int max_j){
-if(player1.pos==objs[2]){
-        player1.pos=objs[3];
-        objs[2]=' ';
-        objs[3]=' ';
-        tele(map,max_i,max_j);
-        return;
 
-    }
-    if(player1.pos==objs[3]){
-        player1.pos=objs[2];
-        objs[2]=' ';
-        objs[3]=' ';
-        tele(map,max_i,max_j);
-        return;
-
-    }
-    if(player2.pos=objs[2]){
-        player2.pos=objs[3];
-        objs[2]=' ';
-        objs[3]=' ';
-        tele(map,max_i,max_j);
-        return;
-
-    }
-    if(player2.pos=objs[3]){
-        player2.pos=objs[2];
-        objs[2]=' ';
-        objs[3]=' ';
-        tele(map,max_i,max_j);
-        return;
-
-    }
-}
 void submit_game(Player *player1, Player *player2) {
     FILE *leader_file = fopen(LEADERBOARD_FILE, "r");
-    char c, content[1000];
-    int n = 0;
+    char content[1000];
+    int n = 0, c;
     for (int i = 0; (c = getc(leader_file)) != EOF && i < 1000; i++) {
-        content[i] = c;
+        content[i] = (char)c;
         if (c == '\n')
             n += 1;
     }
     Game *games = (Game *) malloc(sizeof(Game) * n);
     int nn = 0;
-    for(int i = 0; i < len(content);){
-        while(content[i] != '\n'){
+    for (int i = 0; i < len(content);) {
+        while (content[i] != '\n') {
             int s1, s2;
             char n1[20], n2[20];
-            getname(content,&i, n1);
+            getname(content, &i, n1);
             s1 = getnum(content, &i);
             s2 = getnum(content, &i);
             getname(content, &i, n2);
-            games[nn++] = (Game){{{0,0}, s1, ' ', n1}, {{0,0}, s2, ' ', n2}};
+            games[nn++] = (Game) {{{0, 0}, s1, ' ', n1},
+                                  {{0, 0}, s2, ' ', n2}};
         }
     }
 }
 
 int len(char *c) {
     int n = 0;
-    while(c[n++]);
-    return n-1;
+    while (c[n++]);
+    return n - 1;
 }
 
-//Point *get_all_objs(Game *game) {
-//    Point *objs = (Point *) malloc(sizeof(Point) * (5 + game->n_wall + game->n_block + game->n_point));
-//    objs[0] = game->player1;
-//    objs[1] = game->player2;
-//    objs[2] = game->tele1;
-//    objs[3] = game->tele2;
-//    objs[4] = game->F;
-//
-//    for (int i = 0; i < game->n_wall; i++)
-//        objs[i + 5] = game->wall[i];
-//
-//    for (int i = 0; i < game->n_block; i++)
-//        objs[i + 5 + game->n_wall] = game->block[i];
-//
-//    for (int i = 0; i < game->n_point; i++)
-//        objs[i + 5 + game->n_wall + game->n_block] = game->point[i];
-//
-//    return objs;
-//}
-//
+Point *get_objs(char** map, char c, Point max) {
+    int n = 0;
+    for(int i = 0; i < max.x; i++)
+        for(int j = 0; j < max.y; j++)
+            if(map[i][j] == c)
+                n += 1;
+    Point* objs = (Point*)malloc(sizeof(Point)*n);
+    int k = 0;
+    for(int i = 0; i < max.x; i++)
+        for(int j = 0; j < max.y; j++)
+            if(map[i][j] == c)
+                objs[k++] = (Point){i, j};
+    return objs;
+}
+
 void getkey(char *STATE1, char *STATE2) {
     char c;
     if (kbhit()) {
         c = getch();
         switch (c) {
             case 'a':
-                STATE1 = "left";
+                *STATE1 = 'l';
                 break;
             case 'd':
-                STATE1 = "right";
+                *STATE1 = 'r';
                 break;
             case 'w':
-                STATE1 = "up";
+                *STATE1 = 'u';
                 break;
             case 's':
-                STATE1 = "down";
+                *STATE1 = 'd';
                 break;
             case 65:
-                STATE2 = "up";
+                *STATE2 = 'u';
                 break;
             case 66:
-                STATE2 = "down";
+                *STATE2 = 'd';
                 break;
             case 67:
-                STATE2 = "right";
+                *STATE2 = 'r';
                 break;
             case 68:
-                STATE2 = "left";
+                *STATE2 = 'l';
                 break;
         }
     }
 }
-void repoint(char** map,int i,int j,int max_i,int,max_j){
-    int x;
-    int y;
-    int n=1;
-    map[i][j]=' ';
-    while(n>0){
-        x=rand()%max_i;
-        y=rand()%max_j;
-        if(map[x][y]==' '){
-            map[x][y]=='.';
-            n--;
-        }
-    }
 
+void move_player(char **map, Player *player, Point r, Point max) {
+    Point new_pos = {player->pos.x + r.x, player->pos.y + r.y};
+    char c = map[new_pos.x][new_pos.y];
+    if (c == ' ') {
+        player->pos.x += 1;
+        return;
+    }
+    if (c == 'B' || c == '!')
+        return;
+    if (c == 'T') {
+        teleport(map, player, get_objs(map, 'T', max), max);
+        reobj(map, player->pos, max);
+        return;
+    }
+    if (c == '.') {
+        player->score += 1;
+        player->pos.x += 1;
+        reobj(map, player->pos, max);
+        return;
+    }
+    if (c == 'F') {
+        player->score += 5;
+        reobj(map, player->pos, max);
+        player->pos.x += 1;
+        return;
+    }
 }
-void ref(char** map,int i,int j,int max_i,int,max_j){
-    int x;
-    int y;
-    int n=1;
-    map[i][j]=' ';
-    while(n>0){
-        x=rand()%max_i;
-        y=rand()%max_j;
-        if(map[x][y]==' '){
-            map[x][y]=='F';
-            n--;
-        }
-    }
 
+
+void move(char **map,Point max, char *STATE1, char *STATE2, Player *player1, Player *player2) {
+    Point r;
+    switch (*STATE1) {
+        case 'r':
+            r = (Point) {player1->pos.x + 1, player1->pos.y};
+        case 'l':
+            r = (Point) {player1->pos.x - 1, player1->pos.y};
+        case 'u':
+            r = (Point) {player1->pos.x, player1->pos.y - 1};
+        case 'd':
+            r = (Point) {player1->pos.x, player1->pos.y + 1};
+    }
+    move_player(map, player1, r, max);
+    r = (Point){0, 0};
+    switch (*STATE2) {
+        case 'r':
+            r = (Point) {player2->pos.x + 1, player2->pos.y};
+        case 'l':
+            r = (Point) {player2->pos.x - 1, player2->pos.y};
+        case 'u':
+            r = (Point) {player2->pos.x, player2->pos.y - 1};
+        case 'd':
+            r = (Point) {player2->pos.x, player2->pos.y + 1};
+    }
+    move_player(map, player2, r, max);
 }
-void move(char** map,char *STATE1,char *STATE2,Player *player1,Player *player2){
-    int x=player1.pos.x;
-    int y=player1.pos.y;
-    int i=player2.pos.x;
-    int j=player2.pos.y;
 
-    switch(STATE1){
-        case "right":
-            if(map[player1.pos.x+1]==' '){
-                player1.pos.x+=1;
-                break;
-            }
-            if(map[player1.pos.x+1]=='B'|| map[player1.pos.x+1]=='!')
-                break;
-            if(map[player1.pos.x+1]=='T'){
-                tel();
-                break;
-            }
-            if(map[player1.pos.x+1]=='.'){
-                player1.score+=1;
-                repoint(map,x+1,y,max_i,max_j);
-                player1.pos.x+=1;
-                break;
-            }
-            if(map[player1.pos.x+1]=='F'){
-                player1.score+=5;
-                ref(map,x+1,y,max_i,max_j);
-                player1.pos.x+=1;
-                break;
-            }
-            break;
-        case "left":
-            if(map[player1.pos.x-1]==' '){
-                player1.pos.x-=1;
-                break;
-            }
-            if(map[player1.pos.x-1]=='B'|| map[player1.pos.x-1]=='!')
-                break;
-            if(map[player1.pos.x-1]=='T'){
-                tel();
-                break;
-            }
-            if(map[player1.pos.x-1]=='.'){
-                player1.score+=1;
-                repoint(map,x-1,y,max_i,max_j);
-                player1.pos.x-=1;
-                break;
-            }
-            if(map[player1.pos.x-1]=='F'){
-                player1.score+=5;
-                ref(map,x-1,y,max_i,max_j);
-                player1.pos.x-=1;
-                break;
-            }
-            break;
-        case "up":
-            if(map[player1.pos.y+1]==' '){
-                player1.pos.y+=1;
-                break;
-            }
-            if(map[player1.pos.y+1]=='B'|| map[player1.pos.y+1]=='!')
-                break;
-            if(map[player1.pos.y+1]=='T'){
-                tel();
-                break;
-            }
-            if(map[player1.pos.y+1]=='.'){
-                player1.score+=1;
-                repoint(map,x,y+1,max_imax_j);
-                player1.pos.y+=1;
-                break;
-            }
-            if(map[player1.pos.y+1]=='F'){
-                player1.score+=5;
-                ref(map,x,y+1,max_i,max_j);
-                player1.pos.y+=1;
-                break;
-            }
-            break;
-        case "down":
-            if(map[player1.pos.y-1]==' '){
-                player1.pos.y-=1;
-                break;
-            }
-            if(map[player1.pos.y-1]=='B'|| map[player1.pos.y-1]=='!')
-                break;
-            if(map[player1.pos.y-1]=='T'){
-                tel();
-                break;
-            }
-            if(map[player1.pos.y-1]=='.'){
-                player1.score+=1;
-                repoint(map,x,y-1,max_i,max_j);
-                player1.pos.y-=1;
-                break;
-            }
-            if(map[player1.pos.y-1]=='F'){
-                player1.score+=5;
-                ref(map,x,y-1,max_i,max_j;
-                player1.pos.y-=1;
-                break;
-            }
-            break;
-    }
-    switch(STATE2){
-        case "right":
-            if(map[player2.pos.x+1]==' '){
-                player2.pos.x+=1;
-                break;
-            }
-            if(map[player2.pos.x+1]=='B'|| map[player2.pos.x+1]=='!')
-                break;
-            if(map[player2.pos.x+1]=='T'){
-                tel();
-                break;
-            }
-            if(map[player2.pos.x+1]=='.'){
-                player2.score+=1;
-                repoint(map,i+1,j,max_i,max_j);
-                player2.pos.x+=1;
-                break;
-            }
-            if(map[player.pos.x+1]=='F'){
-                player2.score+=5;
-                ref(map,i+1,j,max_i,max_j);
-                player2.pos.x+=1;
-                break;
-            }
-            break;
-        case "left":
-            if(map[player2.pos.x-1]==' '){
-                player2.pos.x-=1;
-                break;
-            }
-            if(map[player2.pos.x-1]=='B'|| map[player2.pos.x-1]=='!')
-                break;
-            if(map[player2.pos.x-1]=='T'){
-                tel();
-                break;
-            }
-            if(map[player2.pos.x-1]=='.'){
-                player2.score+=1;
-                repoint(map,i-1,j,max_i,max_j);
-                player2.pos.x-=1;
-                break;
-            }
-            if(map[player2.pos.x-1]=='F'){
-                player2.score+=5;
-                ref(map,i-1,j,max_i,max_j);
-                player2.pos.x-=1;
-                break;
-            }
-            break;
-        case "up":
-            if(map[player2.pos.y+1]==' '){
-                player2.pos.y+=1;
-                break;
-            }
-            if(map[player2.pos.y+1]=='B'|| map[player2.pos.y+1]=='!')
-                break;
-            if(map[player2.pos.y+1]=='T'){
-                tel();
-                break;
-            }
-            if(map[player2.pos.y+1]=='.'){
-                player2.score+=1;
-                repoint(map,i,j+1,max_i,max_j);
-                player2.pos.y+=1;
-                break;
-            }
-            if(map[player2.pos.y+1]=='F'){
-                player2.score+=5;
-                ref(map,i,j+1,max_i,max_j);
-                player2.pos.y+=1;
-                break;
-            }
-            break;
-        case "down":
-            if(map[player2.pos.y-1]==' '){
-                player2.pos.y-=1;
-                break;
-            }
-            if(map[player2.pos.y-1]=='B'|| map[player2.pos.y-1]=='!')
-                break;
-            if(map[player2.pos.y-1]=='T'){
-                tel();
-                break;
-            }
-            if(map[player2.pos.y-1]=='.'){
-                player2.score+=1;
-                repoint(map,i,j-1,max_i,max_j);
-                player2.pos.y-=1;
-                break;
-            }
-            if(map[player2.pos.y-1]=='F'){
-                player2.score+=5;
-                ref(map,i,j-1,max_i,max_j);
-                player2.pos.y-=1;
-                break;
-            }
-            break;
-        }
+void reobj(char **map, Point p, Point max) {
+    char c =  map[p.x][p.y];
+    map[p.x][p.y] = ' ';
+    Point randp = {rand()%max.x, rand()%max.y};
+    while(map[randp.x][randp.y] != ' ')
+        randp = (Point){rand()%max.x, rand()%max.y};
+    map[randp.x][randp.y] = c;
+}
+
+void teleport(char **map, Player *player, Point *teleports, Point max) {
+    Point *start, *end;
+    if(is_equal(&player->pos, &teleports[0]))
+        start = &teleports[0], end = &teleports[1];
+    else
+        start = &teleports[1], end = &teleports[0];
+    player->pos = *end;
+    reobj(map, *start, max);
 }

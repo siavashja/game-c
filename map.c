@@ -47,6 +47,8 @@ void blocker(char** map,int i, int j,int n){
     while(n>0){
         x=rand()%i;
         y=rand()%j;
+        if(find_around(map, (Point){x,y}, 'B', (Point){i, j}))
+            continue;
         if(map[x][y]==' '){
             map[x][y]='B';
             n--;
@@ -115,4 +117,21 @@ int abs(int x) {
     if(x < 0)
         return -x;
     return x;
+}
+
+int is_equal(Point *f, Point *s) {
+    if(f->x == s->x && f->y == s->y)
+        return 1;
+    return 0;
+}
+
+int find_around(char** map, Point p, char c, Point max) {
+    for(int i = -1; i <= 1; i++)
+        for(int j = -1; j <= 1; j++) {
+            if (p.x + i >= max.x || p.x + i < 0) continue;
+            if (p.y + j >= max.y || p.y + j < 0) continue;
+            if(map[i][j] == c)
+                return 1;
+        }
+    return 0;
 }
